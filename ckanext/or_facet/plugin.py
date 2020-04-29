@@ -15,8 +15,8 @@ def _get_ors():
 def _split_fq(fq, field):
     exp = re.compile(_term_pattern.format(field=field))
     fqs = [
-        fq.group(0).strip()
-        for fq in
+        match.group(0).strip()
+        for match in
         exp.finditer(fq)
     ]
 
