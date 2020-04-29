@@ -17,7 +17,7 @@ ckanext-or_facet
 Installation
 ------------
 
-To install ckanext-or_facet:
+To install ckanext-or-facet:
 
 1. Activate your CKAN virtual environment, for example::
 
@@ -25,7 +25,7 @@ To install ckanext-or_facet:
 
 2. Install the ckanext-or_facet Python package into your virtual environment::
 
-     pip install ckanext-or_facet
+     pip install ckanext-or-facet
 
 3. Add ``or_facet`` to the ``ckan.plugins`` setting in your CKAN
    config file (by default the config file is located at
