@@ -5,7 +5,14 @@ import re
 import ckan.plugins as plugins
 import ckantoolkit as tk
 
-_term_pattern = r'(^|(?<=\s)){field}:(\'|")?(?P<term>.+?)(\1|\1|)(?=\s|$)'
+_term_pattern = (
+    r'(^|(?<=\s))'  # begining of the line or space after facet
+    r'{field}:'  # fixed field name(must be replaced)
+    r'(?P<quote>\'|\")?'  # optional open-quote
+    r'(?P<term>.+?)'  # facet value
+    r'(?(quote)(?P=quote))'  # optional closing quote
+    r'(?=\s|$)'  # end of the line or space before facet
+)
 
 
 def _get_ors():

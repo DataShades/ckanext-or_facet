@@ -30,6 +30,8 @@ class TestSplit(object):
     @pytest.mark.parametrize(
         "fq, field, expected",
         [
+            ('tags:"Structural Framework"', "tags",
+             ('{!q.op=OR tag=orFqtags}tags:"Structural Framework"', "")),
             ("organization:123", "tags", (None, "organization:123")),
             ("", "tags", (None, "")),
             ("x:1", "x", (_orPrefix("x") + "x:1", "")),
@@ -56,6 +58,7 @@ class TestSplit(object):
                 "z-z",
                 (_orPrefix("z-z") + "z-z:c-c", "x-x:a-a y-y:b-b"),
             ),
+
         ],
     )
     def test_split(self, fq, field, expected):
