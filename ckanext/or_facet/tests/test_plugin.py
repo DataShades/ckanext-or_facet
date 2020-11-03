@@ -11,19 +11,31 @@ def _orPrefix(field):
 
 class TestConfig(object):
     def test_missing_config_parsed(self):
-        assert plugin._get_ors() == []
+        assert plugin._get_default_ors() == []
 
     @pytest.mark.ckan_config("or_facet.or_facets", None)
     def test_empty_config_parsed(self):
-        assert plugin._get_ors() == []
+        assert plugin._get_default_ors() == []
 
     @pytest.mark.ckan_config("or_facet.or_facets", "tags")
     def test_single_config_parsed(self):
-        assert plugin._get_ors() == ["tags"]
+        assert plugin._get_default_ors() == ["tags"]
 
     @pytest.mark.ckan_config("or_facet.or_facets", "tags res_format")
     def test_multiple_config_parsed(self):
-        assert plugin._get_ors() == ["tags", "res_format"]
+        assert plugin._get_default_ors() == ["tags", "res_format"]
+
+
+class TestExtraOrs(object):
+    def test_base_case(self):
+        extras = {
+            "ext_a": 1,
+            plugin._extra_or_prefix + 'tags': 'on',
+            plugin._extra_or_prefix + 'groups': 'off',
+        }
+        assert plugin._get_extra_ors_state(extras) == {
+            'tags': True, "groups": False
+        }
 
 
 class TestSplit(object):
@@ -95,6 +107,44 @@ class TestPlugin(object):
                 "package_search",
                 fq="res_format:{}".format(fmt),
                 **{"facet.field": '["res_format"]'}
+            )
+            assert result["count"] == count
+            assert result["facets"]["res_format"] == expected_formats
+
+    @pytest.mark.ckan_config("or_facet.or_facets", "tags")
+    def test_search_with_one_or_and_one_extra_or(self):
+        expected_tags = {"bye": 1, "hello": 1, "world": 2}
+        expected_formats = {"JSON": 1, "HTML": 1, "CSV": 2}
+
+        d1 = factories.Dataset(tags=[{"name": "hello"}, {"name": "world"}])
+        d2 = factories.Dataset(tags=[{"name": "bye"}, {"name": "world"}])
+
+        factories.Resource(package_id=d1["id"], format="CSV")
+        factories.Resource(package_id=d1["id"], format="JSON")
+        factories.Resource(package_id=d2["id"], format="CSV")
+        factories.Resource(package_id=d2["id"], format="HTML")
+
+        for tag, count in expected_tags.items():
+            result = helpers.call_action(
+                "package_search",
+                fl="id,tags",
+                fq="tags:{}".format(tag),
+                **{
+                    "facet.field": '["tags"]',
+                    plugin._extra_or_prefix + 'res_format': 'on'
+                }
+            )
+            assert result["count"] == count
+            assert result["facets"]["tags"] == expected_tags
+
+        for fmt, count in expected_formats.items():
+            result = helpers.call_action(
+                "package_search",
+                fq="res_format:{}".format(fmt),
+                **{
+                    "facet.field": '["res_format"]',
+                    plugin._extra_or_prefix + 'res_format': 'on'
+                }
             )
             assert result["count"] == count
             assert result["facets"]["res_format"] == expected_formats

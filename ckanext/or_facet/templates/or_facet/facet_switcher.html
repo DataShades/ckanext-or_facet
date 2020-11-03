@@ -1,0 +1,3 @@
+{% set enabled = h.or_facet_or_enabled(name, request.params) %}
+{% set href = h.remove_url_param(h.or_facet_switcher_prefix()~name, replace='off' if enabled else 'on', extras=extras, alternative_url=alternative_url) %}
+<a href="{{ href }}">{{ any_label or 'ANY' if enabled else all_label or 'ALL' }}</a>

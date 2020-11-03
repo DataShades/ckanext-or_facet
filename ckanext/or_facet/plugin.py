@@ -14,9 +14,29 @@ _term_pattern = (
     r'(?=\s|$)'  # end of the line or space before facet
 )
 
+_extra_or_prefix = 'ext_or_facet_extra_or_'
 
-def _get_ors():
+
+def or_facet_switcher_prefix():
+    return _extra_or_prefix
+
+
+def or_facet_or_enabled(type, params={}):
+    state = _get_extra_ors_state(params)
+    return state.get(type, type in _get_default_ors())
+
+
+def _get_default_ors():
     return tk.aslist(tk.config.get('or_facet.or_facets'))
+
+
+def _get_extra_ors_state(extras):
+    padding = len(_extra_or_prefix)
+    return {
+        key[padding:]: tk.asbool(v)
+        for key, v in extras.items()
+        if key.startswith(_extra_or_prefix)
+    }
 
 
 def _split_fq(fq, field):
@@ -36,6 +56,22 @@ def _split_fq(fq, field):
 
 class OrFacetPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IPackageController, inherit=True)
+    plugins.implements(plugins.ITemplateHelpers)
+    plugins.implements(plugins.IConfigurer)
+
+    # IConfigurer
+
+    def update_config(self, config_):
+        tk.add_template_directory(config_, 'templates')
+
+
+    # ITemplateHelpers
+
+    def get_helpers(self):
+        return {
+            'or_facet_switcher_prefix': or_facet_switcher_prefix,
+            'or_facet_or_enabled': or_facet_or_enabled,
+        }
 
     # IPackageController
 
@@ -43,7 +79,12 @@ class OrFacetPlugin(plugins.SingletonPlugin):
         fl = search_params.setdefault('facet.field', [])
         fq_list = search_params.setdefault('fq_list', [])
         fq = search_params.get('fq', '')
-        ors = _get_ors()
+        ors = set(_get_default_ors())
+        for (field, enabled) in _get_extra_ors_state(search_params.get('extras', {})).items():
+            if enabled:
+                ors.add(field)
+            elif field in ors:
+                ors.remove(field)
 
         for field in ors:
             extracted, fq = _split_fq(fq, field)
