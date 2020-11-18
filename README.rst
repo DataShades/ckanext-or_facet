@@ -9,9 +9,7 @@
 ckanext-or_facet
 ================
 
-.. Put a description of your extension here:
-   What does it do? What features does it have?
-   Consider including some screenshots or embedding a video!
+Change logic of applying facets. With a bit of extra configuration, search for datasets, including **any** of applied facets, not necessary **all** of them
 
 ------------
 Installation
@@ -40,7 +38,7 @@ To install ckanext-or-facet:
 Config Settings
 ---------------
 
-Document any optional config settings here. For example::
+::
 
     # List of facets that are using OR when applied.
     # (optional, default: empty list).
