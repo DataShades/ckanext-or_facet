@@ -1,4 +1,4 @@
-{% if h.ckan_version() > '2.9' %}
+{% if h.ckan_version().split(".")[1]|int >= 9 %}
     {% set get_params = request.args %}
 {% else %}
     {% set get_params = request.params %}

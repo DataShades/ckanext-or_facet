@@ -16,6 +16,9 @@ _term_pattern = (
 
 _extra_or_prefix = 'ext_or_facet_extra_or_'
 
+CONFIG_ORS = "ckanext.or_facet.optional"
+CONFIG_LEGACY_ORS = "or_facet.or_facets"
+
 
 def or_facet_switcher_prefix():
     return _extra_or_prefix
@@ -27,7 +30,7 @@ def or_facet_or_enabled(type, params={}):
 
 
 def _get_default_ors():
-    return tk.aslist(tk.config.get('or_facet.or_facets'))
+    return tk.aslist(tk.config.get(CONFIG_ORS) or tk.config.get(CONFIG_LEGACY_ORS))
 
 
 def _get_extra_ors_state(extras):
