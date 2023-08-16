@@ -78,7 +78,7 @@ class OrFacetPlugin(plugins.SingletonPlugin):
 
     # IPackageController
 
-    def before_search(self, search_params):
+    def before_dataset_search(self, search_params):
         fl = search_params.setdefault('facet.field', [])
         fq_list = search_params.setdefault('fq_list', [])
         fq = search_params.get('fq', '')
@@ -103,3 +103,9 @@ class OrFacetPlugin(plugins.SingletonPlugin):
         search_params['fq'] = fq
 
         return search_params
+
+    before_search = before_dataset_search
+
+
+if tk.check_ckan_version("2.10"):
+    tk.blanket.config_declarations(OrFacetPlugin)
