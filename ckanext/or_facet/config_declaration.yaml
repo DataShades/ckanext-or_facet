@@ -1,0 +1,7 @@
+version: 1
+groups:
+  - annotation: ckanext-or-facet
+    options:
+      - key: ckanext.or_facet.optional
+        legacy_key: or_facet.or_facets
+        type: list
