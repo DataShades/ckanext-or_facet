@@ -30,20 +30,21 @@ class TestExtraOrs(object):
     def test_base_case(self):
         extras = {
             "ext_a": 1,
-            plugin._extra_or_prefix + 'tags': 'on',
-            plugin._extra_or_prefix + 'groups': 'off',
+            plugin._extra_or_prefix + "tags": "on",
+            plugin._extra_or_prefix + "groups": "off",
         }
-        assert plugin._get_extra_ors_state(extras) == {
-            'tags': True, "groups": False
-        }
+        assert plugin._get_extra_ors_state(extras) == {"tags": True, "groups": False}
 
 
 class TestSplit(object):
     @pytest.mark.parametrize(
         "fq, field, expected",
         [
-            ('tags:"Structural Framework"', "tags",
-             ('{!q.op=OR tag=orFqtags}tags:"Structural Framework"', "")),
+            (
+                'tags:"Structural Framework"',
+                "tags",
+                ('{!q.op=OR tag=orFqtags}tags:"Structural Framework"', ""),
+            ),
             ("organization:123", "tags", (None, "organization:123")),
             ("", "tags", (None, "")),
             ("x:1", "x", (_orPrefix("x") + "x:1", "")),
@@ -70,7 +71,6 @@ class TestSplit(object):
                 "z-z",
                 (_orPrefix("z-z") + "z-z:c-c", "x-x:a-a y-y:b-b"),
             ),
-
         ],
     )
     def test_split(self, fq, field, expected):
@@ -80,7 +80,7 @@ class TestSplit(object):
 @pytest.mark.usefixtures("clean_db", "clean_index")
 class TestPlugin(object):
     @pytest.mark.ckan_config("or_facet.or_facets", "tags res_format")
-    def test_search_with_two_ors(self):
+    def test_search_with_two_ors(self, organization):
         expected_tags = {"bye": 1, "hello": 1, "world": 2}
         expected_formats = {"JSON": 1, "HTML": 1, "CSV": 2}
 
@@ -131,7 +131,7 @@ class TestPlugin(object):
                 fq="tags:{}".format(tag),
                 **{
                     "facet.field": '["tags"]',
-                    plugin._extra_or_prefix + 'res_format': 'on'
+                    plugin._extra_or_prefix + "res_format": "on",
                 }
             )
             assert result["count"] == count
@@ -143,7 +143,7 @@ class TestPlugin(object):
                 fq="res_format:{}".format(fmt),
                 **{
                     "facet.field": '["res_format"]',
-                    plugin._extra_or_prefix + 'res_format': 'on'
+                    plugin._extra_or_prefix + "res_format": "on",
                 }
             )
             assert result["count"] == count
@@ -166,7 +166,6 @@ class TestPlugin(object):
             assert result["facets"]["tags"] == expected_tags
 
     def test_search_without_ors(self):
-
         factories.Dataset(tags=[{"name": "hello"}, {"name": "world"}])
         factories.Dataset(tags=[{"name": "bye"}, {"name": "world"}])
 
@@ -180,10 +179,7 @@ class TestPlugin(object):
         assert result["facets"]["tags"] == {"hello": 1, "world": 1}
 
         result = helpers.call_action(
-            "package_search",
-            fl="id,tags",
-            fq="tags:bye",
-            **{"facet.field": '["tags"]'}
+            "package_search", fl="id,tags", fq="tags:bye", **{"facet.field": '["tags"]'}
         )
         assert result["count"] == 1
         assert result["facets"]["tags"] == {"bye": 1, "world": 1}
