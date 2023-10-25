@@ -6,15 +6,15 @@ import ckan.plugins as plugins
 import ckantoolkit as tk
 
 _term_pattern = (
-    r'(^|(?<=\s))'  # begining of the line or space after facet
-    r'{field}:'  # fixed field name(must be replaced)
-    r'(?P<quote>\'|\")?'  # optional open-quote
-    r'(?P<term>.+?)'  # facet value
-    r'(?(quote)(?P=quote))'  # optional closing quote
-    r'(?=\s|$)'  # end of the line or space before facet
+    r"(^|(?<=\s))"  # begining of the line or space after facet
+    r"{field}:"  # fixed field name(must be replaced)
+    r"(?P<quote>\'|\")?"  # optional open-quote
+    r"(?P<term>.+?)"  # facet value
+    r"(?(quote)(?P=quote))"  # optional closing quote
+    r"(?=\s|$)"  # end of the line or space before facet
 )
 
-_extra_or_prefix = 'ext_or_facet_extra_or_'
+_extra_or_prefix = "ext_or_facet_extra_or_"
 
 CONFIG_ORS = "ckanext.or_facet.optional"
 CONFIG_LEGACY_ORS = "or_facet.or_facets"
@@ -44,16 +44,12 @@ def _get_extra_ors_state(extras):
 
 def _split_fq(fq, field):
     exp = re.compile(_term_pattern.format(field=field))
-    fqs = [
-        match.group(0).strip()
-        for match in
-        exp.finditer(fq)
-    ]
+    fqs = [match.group(0).strip() for match in exp.finditer(fq)]
 
     if not fqs:
         return None, fq
-    fq = exp.sub('', fq).strip()
-    extracted = '{!q.op=OR tag=orFq%s}' % field + ' '.join(fqs)
+    fq = exp.sub("", fq).strip()
+    extracted = "{!q.op=OR tag=orFq%s}" % field + " ".join(fqs)
     return extracted, fq
 
 
@@ -65,25 +61,26 @@ class OrFacetPlugin(plugins.SingletonPlugin):
     # IConfigurer
 
     def update_config(self, config_):
-        tk.add_template_directory(config_, 'templates')
-
+        tk.add_template_directory(config_, "templates")
 
     # ITemplateHelpers
 
     def get_helpers(self):
         return {
-            'or_facet_switcher_prefix': or_facet_switcher_prefix,
-            'or_facet_or_enabled': or_facet_or_enabled,
+            "or_facet_switcher_prefix": or_facet_switcher_prefix,
+            "or_facet_or_enabled": or_facet_or_enabled,
         }
 
     # IPackageController
 
     def before_dataset_search(self, search_params):
-        fl = search_params.setdefault('facet.field', [])
-        fq_list = search_params.setdefault('fq_list', [])
-        fq = search_params.get('fq', '')
+        fl = search_params.setdefault("facet.field", [])
+        fq_list = search_params.setdefault("fq_list", [])
+        fq = search_params.get("fq", "")
         ors = set(_get_default_ors())
-        for (field, enabled) in _get_extra_ors_state(search_params.get('extras', {})).items():
+        for field, enabled in _get_extra_ors_state(
+            search_params.get("extras", {})
+        ).items():
             if enabled:
                 ors.add(field)
             elif field in ors:
@@ -94,13 +91,10 @@ class OrFacetPlugin(plugins.SingletonPlugin):
             if extracted:
                 fq_list.append(extracted)
 
-        fl[:] = [
-            '{!ex=orFq%s}' % field + field
-            if field in ors
-            else field
-            for field in fl
+        search_params["facet.field"] = [
+            "{!ex=orFq%s}" % field + field if field in ors else field for field in fl
         ]
-        search_params['fq'] = fq
+        search_params["fq"] = fq
 
         return search_params
 

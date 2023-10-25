@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## Unreleased
+
+<small>[Compare with latest](https://github.com/DataShades/ckanext-or_facet/compare/v0.1.0...HEAD)</small>
+
+<!-- insertion marker -->
 ## [v0.1.0](https://github.com/DataShades/ckanext-or_facet/releases/tag/v0.1.0) - 2023-08-16
 
 <small>[Compare with v0.0.6](https://github.com/DataShades/ckanext-or_facet/compare/v0.0.6...v0.1.0)</small>
