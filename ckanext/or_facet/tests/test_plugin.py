@@ -6,7 +6,7 @@ import ckanext.or_facet.plugin as plugin
 
 
 def _orPrefix(field):
-    return "{!q.op=OR tag=orFq%s}" % field
+    return "{!edismax q.op=OR tag=orFq%s}" % field
 
 
 class TestConfig(object):
@@ -43,7 +43,7 @@ class TestSplit(object):
             (
                 'tags:"Structural Framework"',
                 "tags",
-                ('{!q.op=OR tag=orFqtags}tags:"Structural Framework"', ""),
+                ('{!edismax q.op=OR tag=orFqtags}tags:"Structural Framework"', ""),
             ),
             ("organization:123", "tags", (None, "organization:123")),
             ("", "tags", (None, "")),
@@ -77,7 +77,8 @@ class TestSplit(object):
         assert plugin._split_fq(fq, field) == expected
 
 
-@pytest.mark.usefixtures("clean_db", "clean_index")
+@pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")
+@pytest.mark.ckan_config("ckan.search.solr_allowed_query_parsers", "edismax")
 class TestPlugin(object):
     @pytest.mark.ckan_config("or_facet.or_facets", "tags res_format")
     def test_search_with_two_ors(self, organization):
