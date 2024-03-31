@@ -8,9 +8,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 <!-- insertion marker -->
 ## Unreleased
 
-<small>[Compare with latest](https://github.com/DataShades/ckanext-or_facet/compare/v0.1.0...HEAD)</small>
+<small>[Compare with latest](https://github.com/DataShades/ckanext-or_facet/compare/v0.1.1...HEAD)</small>
+
+### Bug Fixes
+
+- CKAN v2.10.4 blocks local query parameters ([a129ef1](https://github.com/DataShades/ckanext-or_facet/commit/a129ef1f082d7648db2bacf3f4b35abadc6f1d61) by Sergey Motornyuk).
 
 <!-- insertion marker -->
+## [v0.1.1](https://github.com/DataShades/ckanext-or_facet/releases/tag/v0.1.1) - 2023-10-25
+
+<small>[Compare with v0.1.0](https://github.com/DataShades/ckanext-or_facet/compare/v0.1.0...v0.1.1)</small>
+
+### Bug Fixes
+
+- facet labels broken after visiting homepage ([0f21820](https://github.com/DataShades/ckanext-or_facet/commit/0f2182060ab954826b9ca865d0ab193f19569d2c) by Sergey Motornyuk).
+
 ## [v0.1.0](https://github.com/DataShades/ckanext-or_facet/releases/tag/v0.1.0) - 2023-08-16
 
 <small>[Compare with v0.0.6](https://github.com/DataShades/ckanext-or_facet/compare/v0.0.6...v0.1.0)</small>
