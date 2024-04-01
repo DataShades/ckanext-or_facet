@@ -1,34 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import re
-import os
 import ckan.plugins as plugins
-import ckantoolkit as tk
-
-
-try:
-    from ckan.lib.search.query import _parse_local_params
-    from pyparsing.exceptions import ParseException
-    from pyparsing import (
-        Word, QuotedString, Suppress, OneOrMore, Group, alphanums
-    )
-    try:
-        _parse_local_params('{!edismax q.op=OR}')
-    except ParseException:
-
-        def _patch(local_params):
-            # type: (str) -> list[object]
-            key = Word(alphanums + "_.")
-            value = QuotedString('"') | QuotedString("'") | Word(alphanums + "_$")
-            pair = Group(key + Suppress("=") + value)
-            expression = Suppress("{!") + OneOrMore(pair | key) + Suppress("}")
-            return expression.parse_string(local_params).as_list()
-
-        if not tk.asbool(os.getenv("CKANEXT_OR_FACET_NOPATCH")):
-            _parse_local_params.__code__ = _patch.__code__
-
-except ImportError:
-    pass
+import ckan.plugins.toolkit as tk
 
 _term_pattern = (
     r"(^|(?<=\s))"  # begining of the line or space after facet
@@ -69,12 +43,14 @@ def _get_extra_ors_state(extras):
 
 def _split_fq(fq, field):
     exp = re.compile(_term_pattern.format(field=field))
-    fqs = [match.group(0).strip() for match in exp.finditer(fq)]
+    fqs = [m.group(0).strip() for m in exp.finditer(fq)]
 
     if not fqs:
         return None, fq
     fq = exp.sub("", fq).strip()
-    extracted = "{!edismax q.op=OR tag=orFq%s}" % field + " ".join(fqs)
+    extracted = "{{!bool tag=orFq{} {}}}".format(
+        field, " ".join("should='{}'".format(item.replace("'", r"\'")) for item in fqs)
+    )
     return extracted, fq
 
 
@@ -118,7 +94,8 @@ class OrFacetPlugin(plugins.SingletonPlugin):
                 fq_list.append(extracted)
 
         search_params["facet.field"] = [
-            "{!edismax ex=orFq%s}" % field + field if field in ors else field for field in fl
+            "{!edismax ex=orFq%s}" % field + field if field in ors else field
+            for field in fl
         ]
         search_params["fq"] = fq
 

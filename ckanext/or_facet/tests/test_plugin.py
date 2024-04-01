@@ -5,8 +5,8 @@ import ckan.tests.factories as factories
 import ckanext.or_facet.plugin as plugin
 
 
-def _orPrefix(field):
-    return "{!edismax q.op=OR tag=orFq%s}" % field
+def _prepare_ors(field, fqs):
+    return "{{!bool tag=orFq{} {}}}".format(field, " ".join("should='{}'".format(fq) for fq in fqs))
 
 
 class TestConfig(object):
@@ -43,33 +43,33 @@ class TestSplit(object):
             (
                 'tags:"Structural Framework"',
                 "tags",
-                ('{!edismax q.op=OR tag=orFqtags}tags:"Structural Framework"', ""),
+                ('{!bool tag=orFqtags should=\'tags:"Structural Framework"\'}', ""),
             ),
             ("organization:123", "tags", (None, "organization:123")),
             ("", "tags", (None, "")),
-            ("x:1", "x", (_orPrefix("x") + "x:1", "")),
-            ("x:hello x:world", "x", (_orPrefix("x") + "x:hello x:world", "")),
-            ("x:a y:b", "y", (_orPrefix("y") + "y:b", "x:a")),
-            ('x:"a" y:"b"', "y", (_orPrefix("y") + 'y:"b"', 'x:"a"')),
+            ("x:1", "x", (_prepare_ors("x", ["x:1"]), "")),
+            ("x:hello x:world", "x", (_prepare_ors("x", ["x:hello", "x:world"]), "")),
+            ("x:a y:b", "y", (_prepare_ors("y", ["y:b"]), "x:a")),
+            ('x:"a" y:"b"', "y", (_prepare_ors("y", ['y:"b"']), 'x:"a"')),
             (
                 "z:1 x:a z:2 x:\"b\" z:3 x:'c'",
                 "x",
-                (_orPrefix("x") + "x:a x:\"b\" x:'c'", "z:1  z:2  z:3"),
+                (_prepare_ors("x", ["x:a", 'x:"b"', r"x:\'c\'"]), "z:1  z:2  z:3"),
             ),
             (
                 "x-x:a-a y-y:b-b z-z:c-c",
                 "x-x",
-                (_orPrefix("x-x") + "x-x:a-a", "y-y:b-b z-z:c-c"),
+                (_prepare_ors("x-x", ["x-x:a-a"]), "y-y:b-b z-z:c-c"),
             ),
             (
                 "x-x:a-a y-y:b-b z-z:c-c",
                 "y-y",
-                (_orPrefix("y-y") + "y-y:b-b", "x-x:a-a  z-z:c-c"),
+                (_prepare_ors("y-y", ["y-y:b-b"]), "x-x:a-a  z-z:c-c"),
             ),
             (
                 "x-x:a-a y-y:b-b z-z:c-c",
                 "z-z",
-                (_orPrefix("z-z") + "z-z:c-c", "x-x:a-a y-y:b-b"),
+                (_prepare_ors("z-z", ["z-z:c-c"]), "x-x:a-a y-y:b-b"),
             ),
         ],
     )
@@ -78,7 +78,7 @@ class TestSplit(object):
 
 
 @pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")
-@pytest.mark.ckan_config("ckan.search.solr_allowed_query_parsers", "edismax")
+@pytest.mark.ckan_config("ckan.search.solr_allowed_query_parsers", "edismax bool")
 class TestPlugin(object):
     @pytest.mark.ckan_config("or_facet.or_facets", "tags res_format")
     def test_search_with_two_ors(self, organization):

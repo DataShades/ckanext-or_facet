@@ -14,15 +14,22 @@ datasets, including **any** of applied facets, not necessary **all** of them
 To install ckanext-or-facet:
 
 1. Install the ckanext-or_facet Python package:
+   ```sh
+   pip install ckanext-or-facet
+   ```
 
-		pip install ckanext-or-facet
 
-1. Add ``or_facet`` to the ``ckan.plugins`` setting in your CKAN config file
+1. Add ``or_facet`` to the ``ckan.plugins`` setting in CKAN config file
+
+1. **Starting from CKAN v2.10.4**: Add ``ckan.search.solr_allowed_query_parsers =
+   edismax bool`` to CKAN config file
+
 
 
 
 ## Config Settings
-
-    # List of facets that are using OR when applied.
-    # (optional, default: empty list).
-    ckanext.or_facet.optional = tags res_format
+```ini
+# List of facets that are using OR when applied.
+# (optional, default: empty list).
+ckanext.or_facet.optional = tags res_format
+```
