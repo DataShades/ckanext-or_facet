@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## Unreleased
+
+<small>[Compare with latest](https://github.com/DataShades/ckanext-or_facet/compare/v0.2.0...HEAD)</small>
+
+### Features
+
+- use bool and edismax query parser ([9b6f6aa](https://github.com/DataShades/ckanext-or_facet/commit/9b6f6aad0f318dd3b380d05d9798e56930be676f) by Sergey Motornyuk).
+
+### Code Refactoring
+
+- python2 support removed ([0fe10bf](https://github.com/DataShades/ckanext-or_facet/commit/0fe10bf900351a42b1d6a9cecc7fdf62858b99a1) by Sergey Motornyuk).
+
+<!-- insertion marker -->
 ## [v0.2.0](https://github.com/DataShades/ckanext-or_facet/releases/tag/v0.2.0) - 2024-03-31
 
 <small>[Compare with v0.1.1](https://github.com/DataShades/ckanext-or_facet/compare/v0.1.1...v0.2.0)</small>
