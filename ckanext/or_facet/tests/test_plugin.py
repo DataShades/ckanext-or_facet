@@ -6,10 +6,13 @@ import ckanext.or_facet.plugin as plugin
 
 
 def _prepare_ors(field, fqs):
-    return "{{!bool tag=orFq{} {}}}".format(field, " ".join("should='{}'".format(fq) for fq in fqs))
+    return "{{!bool tag=orFq{} {}}}".format(
+        field,
+        " ".join(f"should='{fq}'" for fq in fqs),
+    )
 
 
-class TestConfig(object):
+class TestConfig:
     def test_missing_config_parsed(self):
         assert plugin._get_default_ors() == []
 
@@ -26,7 +29,7 @@ class TestConfig(object):
         assert plugin._get_default_ors() == ["tags", "res_format"]
 
 
-class TestExtraOrs(object):
+class TestExtraOrs:
     def test_base_case(self):
         extras = {
             "ext_a": 1,
@@ -36,14 +39,14 @@ class TestExtraOrs(object):
         assert plugin._get_extra_ors_state(extras) == {"tags": True, "groups": False}
 
 
-class TestSplit(object):
+class TestSplit:
     @pytest.mark.parametrize(
-        "fq, field, expected",
+        ("fq", "field", "expected"),
         [
             (
                 'tags:"Structural Framework"',
                 "tags",
-                ('{!bool tag=orFqtags should=\'tags:"Structural Framework"\'}', ""),
+                ("{!bool tag=orFqtags should='tags:\"Structural Framework\"'}", ""),
             ),
             ("organization:123", "tags", (None, "organization:123")),
             ("", "tags", (None, "")),
@@ -79,7 +82,7 @@ class TestSplit(object):
 
 @pytest.mark.usefixtures("with_plugins", "clean_db", "clean_index")
 @pytest.mark.ckan_config("ckan.search.solr_allowed_query_parsers", "edismax bool")
-class TestPlugin(object):
+class TestPlugin:
     @pytest.mark.ckan_config("or_facet.or_facets", "tags res_format")
     def test_search_with_two_ors(self, organization):
         expected_tags = {"bye": 1, "hello": 1, "world": 2}
@@ -97,8 +100,8 @@ class TestPlugin(object):
             result = helpers.call_action(
                 "package_search",
                 fl="id,tags",
-                fq="tags:{}".format(tag),
-                **{"facet.field": '["tags"]'}
+                fq=f"tags:{tag}",
+                **{"facet.field": '["tags"]'},
             )
             assert result["count"] == count
             assert result["facets"]["tags"] == expected_tags
@@ -106,8 +109,8 @@ class TestPlugin(object):
         for fmt, count in expected_formats.items():
             result = helpers.call_action(
                 "package_search",
-                fq="res_format:{}".format(fmt),
-                **{"facet.field": '["res_format"]'}
+                fq=f"res_format:{fmt}",
+                **{"facet.field": '["res_format"]'},
             )
             assert result["count"] == count
             assert result["facets"]["res_format"] == expected_formats
@@ -129,11 +132,11 @@ class TestPlugin(object):
             result = helpers.call_action(
                 "package_search",
                 fl="id,tags",
-                fq="tags:{}".format(tag),
+                fq=f"tags:{tag}",
                 **{
                     "facet.field": '["tags"]',
                     plugin._extra_or_prefix + "res_format": "on",
-                }
+                },
             )
             assert result["count"] == count
             assert result["facets"]["tags"] == expected_tags
@@ -141,11 +144,11 @@ class TestPlugin(object):
         for fmt, count in expected_formats.items():
             result = helpers.call_action(
                 "package_search",
-                fq="res_format:{}".format(fmt),
+                fq=f"res_format:{fmt}",
                 **{
                     "facet.field": '["res_format"]',
                     plugin._extra_or_prefix + "res_format": "on",
-                }
+                },
             )
             assert result["count"] == count
             assert result["facets"]["res_format"] == expected_formats
@@ -160,8 +163,8 @@ class TestPlugin(object):
             result = helpers.call_action(
                 "package_search",
                 fl="id,tags",
-                fq="tags:{}".format(tag),
-                **{"facet.field": '["tags"]'}
+                fq=f"tags:{tag}",
+                **{"facet.field": '["tags"]'},
             )
             assert result["count"] == count
             assert result["facets"]["tags"] == expected_tags
@@ -174,13 +177,16 @@ class TestPlugin(object):
             "package_search",
             fl="id,tags",
             fq="tags:hello",
-            **{"facet.field": '["tags"]'}
+            **{"facet.field": '["tags"]'},
         )
         assert result["count"] == 1
         assert result["facets"]["tags"] == {"hello": 1, "world": 1}
 
         result = helpers.call_action(
-            "package_search", fl="id,tags", fq="tags:bye", **{"facet.field": '["tags"]'}
+            "package_search",
+            fl="id,tags",
+            fq="tags:bye",
+            **{"facet.field": '["tags"]'},
         )
         assert result["count"] == 1
         assert result["facets"]["tags"] == {"bye": 1, "world": 1}
@@ -189,7 +195,7 @@ class TestPlugin(object):
             "package_search",
             fl="id,tags",
             fq="tags:world",
-            **{"facet.field": '["tags"]'}
+            **{"facet.field": '["tags"]'},
         )
         assert result["count"] == 2
         assert result["facets"]["tags"] == {"bye": 1, "hello": 1, "world": 2}

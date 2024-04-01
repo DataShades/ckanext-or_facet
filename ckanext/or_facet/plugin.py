@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import re
-import ckan.plugins as plugins
+from typing import Any
+from ckan import plugins
 import ckan.plugins.toolkit as tk
 
 _term_pattern = (
@@ -23,7 +24,9 @@ def or_facet_switcher_prefix():
     return _extra_or_prefix
 
 
-def or_facet_or_enabled(type, params={}):
+def or_facet_or_enabled(type: str, params: dict[str, Any] | None = None):
+    if params is None:
+        params = {}
     state = _get_extra_ors_state(params)
     return state.get(type, type in _get_default_ors())
 
@@ -32,7 +35,7 @@ def _get_default_ors():
     return tk.aslist(tk.config.get(CONFIG_ORS) or tk.config.get(CONFIG_LEGACY_ORS))
 
 
-def _get_extra_ors_state(extras):
+def _get_extra_ors_state(extras: dict[str, Any]):
     padding = len(_extra_or_prefix)
     return {
         key[padding:]: tk.asbool(v)
@@ -41,7 +44,7 @@ def _get_extra_ors_state(extras):
     }
 
 
-def _split_fq(fq, field):
+def _split_fq(fq: str, field: str):
     exp = re.compile(_term_pattern.format(field=field))
     fqs = [m.group(0).strip() for m in exp.finditer(fq)]
 
@@ -49,7 +52,8 @@ def _split_fq(fq, field):
         return None, fq
     fq = exp.sub("", fq).strip()
     extracted = "{{!bool tag=orFq{} {}}}".format(
-        field, " ".join("should='{}'".format(item.replace("'", r"\'")) for item in fqs)
+        field,
+        " ".join("should='{}'".format(item.replace("'", r"\'")) for item in fqs),
     )
     return extracted, fq
 
@@ -61,12 +65,12 @@ class OrFacetPlugin(plugins.SingletonPlugin):
 
     # IConfigurer
 
-    def update_config(self, config_):
+    def update_config(self, config_: Any):
         tk.add_template_directory(config_, "templates")
 
     # ITemplateHelpers
 
-    def get_helpers(self):
+    def get_helpers(self) -> dict[str, Any]:
         return {
             "or_facet_switcher_prefix": or_facet_switcher_prefix,
             "or_facet_or_enabled": or_facet_or_enabled,
@@ -74,14 +78,14 @@ class OrFacetPlugin(plugins.SingletonPlugin):
 
     # IPackageController
 
-    def before_dataset_search(self, search_params):
+    def before_dataset_search(self, search_params: dict[str, Any]):
         fl = search_params.setdefault("facet.field", [])
         fq_list = search_params.setdefault("fq_list", [])
         fq = search_params.get("fq", "")
         ors = set(_get_default_ors())
 
         for field, enabled in _get_extra_ors_state(
-            search_params.get("extras", {})
+            search_params.get("extras", {}),
         ).items():
             if enabled:
                 ors.add(field)

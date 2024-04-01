@@ -50,4 +50,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.0.1](https://github.com/DataShades/ckanext-or_facet/releases/tag/0.0.1) - 2020-04-29
 
 <small>[Compare with first commit](https://github.com/DataShades/ckanext-or_facet/compare/16c77562c58d6ed8b604cc820892beaa7fc67db0...0.0.1)</small>
-
