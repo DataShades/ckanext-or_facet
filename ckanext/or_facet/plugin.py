@@ -97,8 +97,9 @@ class OrFacetPlugin(plugins.SingletonPlugin):
             if extracted:
                 fq_list.append(extracted)
 
+        exclude = ",".join(f"orFq{field}" for field in ors.intersection(fl))
         search_params["facet.field"] = [
-            "{!edismax ex=orFq%s}" % field + field if field in ors else field
+            f"{{!edismax ex='{exclude}'}}{field}" if field in ors else field
             for field in fl
         ]
         search_params["fq"] = fq
